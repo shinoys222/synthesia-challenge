@@ -3,7 +3,7 @@ Synthesia Challenge APIs are implemented using [FastAPI](https://fastapi.tiangol
 
 The application implements a GET Endpoint `/crypto/sign` with a mandatory query field `message` and an optional field `callback_url`. The api returns a json response 
  * `{"success":true,"data":<signed_message>}` with status code `200 OK` if the upstream request is successfull
- * `{"success":true,"data":null}` with status code `200 OK` if the upstream request is unsuccessfull. If the optional query field `callback_url` is provided, the upstream request will be retried (asynchronously) and the `callback_url` endpoint will be notified on success with a POST json body `{"success":true,"data":<signed_message>}`.
+ * `{"success":false,"data":null}` with status code `200 OK` if the upstream request is unsuccessfull. If the optional query field `callback_url` is provided, the upstream request will be retried (asynchronously) and the `callback_url` endpoint will be notified on success with a POST json body `{"success":true,"data":<signed_message>}`.
 
 The following libraries are used for following functions
 
@@ -28,7 +28,7 @@ The application code is divided into following code structure
 
 ## Local development and testing
 
-The application can be run locally using [DockerCompose](https://docs.docker.com/compose/) that has the 
+The application can be run locally using [DockerCompose](https://docs.docker.com/compose/) that has 
  * api container to serve the api requests
  * redis container used as a message queue
  * rqworker container that runs the scheduled worker tasks/jobs
