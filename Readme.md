@@ -15,7 +15,7 @@ The following libraries are used for following functions
 
 ## Project Structure
 
-All the application code can be found inside [app](./app/) folder. Database migration scripts can be found under [versions](./migrations/versions/) folder
+All the application code can be found inside [app](./app/) folder.
 
 The application code is divided into following code structure
 
@@ -32,7 +32,7 @@ The application can be run locally using [DockerCompose](https://docs.docker.com
  * api container to serve the api requests
  * redis container used as a message queue
  * rqworker container that runs the scheduled worker tasks/jobs
- * rqscheduler containter that schedules the jobs at specific times
+ * rqscheduler container that schedules the jobs at specific times
 
 ### Commands
 
