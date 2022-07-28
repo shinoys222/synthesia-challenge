@@ -66,7 +66,7 @@ class APIClient:
         if not self.rate_limit_enabled:
             return
         diff_seconds = (start_time - self.last_req_minute).total_seconds()
-        logger.debug(
+        logger.info(
             f"Ratelimit - enabled:{self.rate_limit_enabled}, rate_limit_per_minute:{self.rate_limit_per_minute},"
             f"seconds: {diff_seconds}, req_count:{self.req_count}"
         )
