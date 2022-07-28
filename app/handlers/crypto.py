@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from typing import Optional
+from pydantic import AnyHttpUrl
 from datetime import timedelta
 from httpx import ConnectTimeout
 from app import settings
@@ -14,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 async def sign_message(
-    message: str, callback_url: Optional[str] = None, attempt_count: int = 0
+    message: str, callback_url: Optional[AnyHttpUrl] = None, attempt_count: int = 0
 ):
     """
     Sign message calls the upstream crypto service sign endpoint.
@@ -56,7 +57,7 @@ async def sign_message(
 
 
 async def sign_message_and_notify_callback(
-    message: str, callback_url: Optional[str], attempt_count: int = 0
+    message: str, callback_url: Optional[AnyHttpUrl], attempt_count: int = 0
 ):
     logger.info(
         f"Signing message:{message}, callback_url:{callback_url}, attempt_count:{attempt_count}"
@@ -70,20 +71,23 @@ async def sign_message_and_notify_callback(
         f"Notifying callback, message:{message}, callback_url:{callback_url}, attempt_count:{attempt_count}"
     )
     try:
+        base_url = f"{callback_url.scheme}://{callback_url.host}"
+        if callback_url.port:
+            base_url = base_url + f":{callback_url.port}"
         async with APIClient(
-            base_url=callback_url,
+            base_url=base_url,
             num_retries=settings.callback.max_retry_count,
             rate_limit_enabled=False,
             timeout_seconds=settings.callback.timeout_seconds,
         ) as api_client:
-            await api_client.request(url="", method="POST", params=params)
+            await api_client.request(url=callback_url.path, method="POST", params=params)
     except Exception as e:
         logger.error(f"Callback API Request Failed - {str(e)} ")
         logger.exception(e)
 
 
 def sign_message_and_notify_event(
-    message: str, callback_url: Optional[str], attempt_count: int = 0
+    message: str, callback_url: Optional[AnyHttpUrl], attempt_count: int = 0
 ):
     """
     Acts on redis queue event/message to sign and notify callback url
@@ -93,6 +97,7 @@ def sign_message_and_notify_event(
             f"Recieved rq event message:{message}, callback_url:{callback_url}, attempt_count:{attempt_count}"
         )
         coro = sign_message_and_notify_callback(message, callback_url, attempt_count)
-        asyncio.run(coro)
+        event_loop = asyncio.get_event_loop()
+        event_loop.run_until_complete(coro)
     except Exception as e:
         logger.exception(e)

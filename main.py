@@ -2,7 +2,7 @@ import typer
 import asyncio
 import logging
 import sys
-from rq import Connection, Worker
+from rq import Connection, SimpleWorker
 from redis import Redis
 
 from app import settings
@@ -39,7 +39,7 @@ def start_worker():
     setup_logging()
     logger.info("Starting Redis Queue Workers")
     with Connection(connection=Redis.from_url(settings.redis_queue.url)):
-        worker = Worker(settings.redis_queue.name)
+        worker = SimpleWorker(settings.redis_queue.name)
         worker.work()
 
 
